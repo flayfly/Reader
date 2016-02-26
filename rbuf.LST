@@ -1,0 +1,149 @@
+C51 COMPILER V9.52.0.0   RBUF                                                              08/07/2015 16:39:06 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE RBUF
+OBJECT MODULE PLACED IN rbuf.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE rbuf.c BROWSE INCDIR(..\hal;..\hal\nrf24le1;..\common) DEBUG OBJECTEXTEND T
+                    -ABS(2)
+
+line level    source
+
+   1          /*
+   2           * Copyright (c) 2008, Swedish Institute of Computer Science.
+   3           * All rights reserved.
+   4           *
+   5           * Redistribution and use in source and binary forms, with or without
+   6           * modification, are permitted provided that the following conditions
+   7           * are met:
+   8           * 1. Redistributions of source code must retain the above copyright
+   9           *    notice, this list of conditions and the following disclaimer.
+  10           * 2. Redistributions in binary form must reproduce the above copyright
+  11           *    notice, this list of conditions and the following disclaimer in the
+  12           *    documentation and/or other materials provided with the distribution.
+  13           * 3. Neither the name of the Institute nor the names of its contributors
+  14           *    may be used to endorse or promote products derived from this software
+  15           *    without specific prior written permission.
+  16           *
+  17           * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+  18           * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  19           * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  20           * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+  21           * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  22           * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  23           * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  24           * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  25           * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  26           * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  27           * SUCH DAMAGE.
+  28           *
+  29           * This file is part of the Contiki operating system.
+  30           *
+  31           */
+  32          
+  33          /**
+  34           * \file
+  35           *         Ring buffer library implementation
+  36           * \author
+  37           *         Adam Dunkels <adam@sics.se>
+  38           */
+  39          
+  40          #include "rbuf.h"
+*** ERROR C141 IN LINE 71 OF rbuf.h: syntax error near ';'
+*** ERROR C141 IN LINE 75 OF rbuf.h: syntax error near '}'
+  41          /*---------------------------------------------------------------------------*/
+  42          void
+  43          ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
+  44          {
+  45   1        r->data = dataptr;
+*** ERROR C141 IN LINE 45 OF rbuf.c: syntax error near 'data', expected '<id>'
+  46   1        r->mask = size - 1;
+*** ERROR C230 IN LINE 46 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 46 OF rbuf.c: 'mask': undefined member
+  47   1        r->put_ptr = 0;
+*** ERROR C230 IN LINE 47 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 47 OF rbuf.c: 'put_ptr': undefined member
+C51 COMPILER V9.52.0.0   RBUF                                                              08/07/2015 16:39:06 PAGE 2   
+
+  48   1        r->get_ptr = 0;
+*** ERROR C230 IN LINE 48 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 48 OF rbuf.c: 'get_ptr': undefined member
+  49   1      }
+  50          /*---------------------------------------------------------------------------*/
+  51          int
+  52          ringbuf_put(struct ringbuf *r, uint8_t c)
+  53          {
+  54   1        /* Check if buffer is full. If it is full, return 0 to indicate that
+  55   1           the element was not inserted into the buffer.
+  56   1      
+  57   1           XXX: there is a potential risk for a race condition here, because
+  58   1           the ->get_ptr field may be written concurrently by the
+  59   1           ringbuf_get() function. To avoid this, access to ->get_ptr must
+  60   1           be atomic. We use an uint8_t type, which makes access atomic on
+  61   1           most platforms, but C does not guarantee this.
+  62   1        */
+  63   1        if(((r->put_ptr - r->get_ptr) & r->mask) == r->mask) {
+*** ERROR C230 IN LINE 63 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 63 OF rbuf.c: 'put_ptr': undefined member
+  64   2          return 0;
+  65   2        }
+  66   1        r->data[r->put_ptr] = c;
+*** ERROR C141 IN LINE 66 OF rbuf.c: syntax error near 'data', expected '<id>'
+*** ERROR C230 IN LINE 66 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 66 OF rbuf.c: 'put_ptr': undefined member
+*** ERROR C141 IN LINE 66 OF rbuf.c: syntax error near ']'
+  67   1        r->put_ptr = (r->put_ptr + 1) & r->mask;
+*** ERROR C230 IN LINE 67 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 67 OF rbuf.c: 'put_ptr': undefined member
+  68   1        return 1;
+  69   1      }
+  70          /*---------------------------------------------------------------------------*/
+  71          int
+  72          ringbuf_get(struct ringbuf *r)
+  73          {
+  74   1        uint8_t c;
+  75   1        
+  76   1        /* Check if there are bytes in the buffer. If so, we return the
+  77   1           first one and increase the pointer. If there are no bytes left, we
+  78   1           return -1.
+  79   1      
+  80   1           XXX: there is a potential risk for a race condition here, because
+  81   1           the ->put_ptr field may be written concurrently by the
+  82   1           ringbuf_put() function. To avoid this, access to ->get_ptr must
+  83   1           be atomic. We use an uint8_t type, which makes access atomic on
+  84   1           most platforms, but C does not guarantee this.
+  85   1        */
+  86   1        if(((r->put_ptr - r->get_ptr) & r->mask) > 0) {
+*** ERROR C230 IN LINE 86 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 86 OF rbuf.c: 'put_ptr': undefined member
+  87   2          c = r->data[r->get_ptr];
+*** ERROR C141 IN LINE 87 OF rbuf.c: syntax error near 'data', expected '<id>'
+*** ERROR C230 IN LINE 87 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 87 OF rbuf.c: 'get_ptr': undefined member
+*** ERROR C141 IN LINE 87 OF rbuf.c: syntax error near ']'
+  88   2          r->get_ptr = (r->get_ptr + 1) & r->mask;
+  89   2          return c;
+  90   2        } else {
+  91   2          return -1;
+  92   2        }
+  93   1      }
+C51 COMPILER V9.52.0.0   RBUF                                                              08/07/2015 16:39:06 PAGE 3   
+
+  94          /*---------------------------------------------------------------------------*/
+  95          int
+  96          ringbuf_size(struct ringbuf *r)
+  97          {
+  98   1        return r->mask + 1;
+*** ERROR C230 IN LINE 98 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 98 OF rbuf.c: 'mask': undefined member
+  99   1      }
+ 100          /*---------------------------------------------------------------------------*/
+ 101          int
+ 102          ringbuf_elements(struct ringbuf *r)
+ 103          {
+ 104   1        return (r->put_ptr - r->get_ptr) & r->mask;
+*** ERROR C230 IN LINE 104 OF rbuf.c: 'ringbuf': unknown struct/union/enum tag
+*** ERROR C204 IN LINE 104 OF rbuf.c: 'put_ptr': undefined member
+ 105   1      }
+ 106          /*---------------------------------------------------------------------------*/
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  27 ERROR(S)
